@@ -1,32 +1,47 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 
 namespace Collections
 {
     public class SocialNetworkUser<TUser> : User, ISocialNetworkUser<TUser>
         where TUser : IUser
     {
+        private Dictionary<string, List<TUser>> groups;
         public SocialNetworkUser(string fullName, string username, uint? age) : base(fullName, username, age)
         {
-            throw new NotImplementedException("TODO is there anything to do here?");
+            FollowedUsers = new List<TUser>();
+            groups = new Dictionary<string, List<TUser>>();
         }
 
         public bool AddFollowedUser(string group, TUser user)
         {
-            throw new NotImplementedException("TODO add user to the provided group. Return false if the user was already in the group");
+            if (FollowedUsers.Contains(user))
+            {
+                return false;
+            }
+            FollowedUsers.Add(user);
+            List<TUser> existing;
+            if (!groups.TryGetValue(group, out existing))
+            {
+                existing = new List<TUser>();
+                groups[group] = existing;
+            }
+            existing.Add(user);
+            return true;
         }
 
-        public IList<TUser> FollowedUsers
-        {
-            get
-            {
-                throw new NotImplementedException("TODO construct and return the list of all users followed by the current users, in all groups");
-            }
-        }
+        public IList<TUser> FollowedUsers { get; }
 
         public ICollection<TUser> GetFollowedUsersInGroup(string group)
         {
-            throw new NotImplementedException("TODO construct and return a collection containing of all users followed by the current users, in group");
+            List<TUser> list;
+            if (!groups.TryGetValue(group, out list))
+            {
+                return new List<TUser>();
+            }
+            return list;
         }
     }
 }
